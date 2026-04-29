@@ -1,8 +1,27 @@
+name: CI
 on:
   push: 
 
 jobs:
   hello:
+    name: Hello World Job
     runs-on: ubuntu-latest
     steps:
-      - run: echo "Hello World!"
+      - name: Print Hello
+        run: echo "Hello World!"
+
+  
+  test:
+    name: Test python script
+    runs-on: ubuntu-latest
+    steps:
+      - name: Get repo
+        uses: actions/checkout@v6
+      - name: Get python
+        uses: actions/setup-python@v6
+        with:
+          python-version: '3.14'
+      - name: Install package
+        run: pip install .[test]
+      - name: Run pytest
+        run: pytest -vv
