@@ -20,8 +20,8 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ubuntu-latest, windows-latest, macos-latest]
-        python-version: ["3.10", "3.14"]
+        os: [ubuntu-latest, windows-latest]
+        python-version: ["3.14"]
     steps:
       - name: Get repo
         uses: actions/checkout@v6
@@ -33,3 +33,34 @@ jobs:
         run: pip install .[test]
       - name: Run pytest
         run: pytest -vv
+  
+  make-slides:
+    name: Pulish slides to Pages
+    runs-on: ubuntu-latest
+    steps:
+      - name: Get repo
+        uses: actions/checkout@v6
+      - name: Get python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.14"
+      - name: Install package
+        run: pip install git+https://gitlab.com/da_doomer/markdown-slides.git
+      - name: Make markdown slides
+        run: mdslides --output_dir slides slides.md
+      - name: Upload pages artifact
+        uses: actions/upload-pages-artifact@v4
+        with:
+          path: ./slides
+
+  # Deployment job
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    needs: make-slides
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
